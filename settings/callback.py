@@ -1,10 +1,12 @@
 from aiogram import types
 from aiogram.fsm.context import FSMContext
-import asyncio
 import datetime
 from .state import CreateOrder
 from .keyboard import (choose_action_keyboard, choose_money_keyboard, choose_color_keyboard,
                        choose_flower_keyboard, create_calendar, create_time_control_keyboard)
+from .db_helper import get_flowers_id, get_byid_flower, get_another_ids_flowers
+from numpy import frombuffer, uint8
+from .message_helper import edit_image_keyboard, create_consultation
 
 
 async def exit_callback(callback: types.CallbackQuery, state: FSMContext):
@@ -17,7 +19,7 @@ async def user_agreement_callback(callback: types.CallbackQuery, state: FSMConte
     data = callback.data.split("_")[1]
     if data == 'yes':
         await state.set_state(CreateOrder.choose_action)
-        await callback.message.answer('К какому событию готовимся?', reply_markup=choose_action_keyboard())
+        await callback.message.answer('К какому событию готовимся?', reply_markup= await choose_action_keyboard())
     if data == 'no':
         await callback.message.answer('Вы не дали согласие')
 
@@ -27,34 +29,81 @@ async def choose_action_callback(callback: types.CallbackQuery, state: FSMContex
     data = callback.data.split("_")[1]
     await state.update_data({'action':data})
     await state.set_state(CreateOrder.choose_money)
-    await callback.message.answer(text='На какую сумму рассчитываете?',reply_markup=choose_money_keyboard())
+    await callback.message.answer(text='На какую сумму рассчитываете?',reply_markup= await choose_money_keyboard())
 
 async def choose_money_callback(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.delete()
     data = callback.data.split("_")[1]
     await state.update_data({'money':data})
     await state.set_state(CreateOrder.choose_color)
-    await callback.message.answer(text='Какую цветовую гамму предпочитаете?',reply_markup=choose_color_keyboard())
+    await callback.message.answer(text='Какую цветовую гамму предпочитаете?',reply_markup = await choose_color_keyboard())
 
 async def choose_color_callback(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.delete()
     data = callback.data.split("_")[1]
     await state.update_data({'color':data})
-    await state.set_state(CreateOrder.choose_flower)
-    #Тут делаю запрос к бд
-    # await callback.message.answer_photo
-    await callback.message.answer('Вот варианты ващих букетов', reply_markup=choose_flower_keyboard())
+    state_data = await state.get_data()
+    bouquet_ids = await get_flowers_id(state_data['color'], state_data['money'], state_data['action'])
+    if not bouquet_ids:
+        #Сделать редирект на консульацию
+        await callback.message.answer('По вашему запросы в данный момент мы ни чего не можем предложить')
+    else:
+        print("Проверка списка букетов",bouquet_ids)
+        first_bouquet = await get_byid_flower(bouquet_ids[0])
+        await state.set_state(CreateOrder.choose_flower)
+        await state.update_data({'number':0,'amount':len(bouquet_ids),'bouquet_list':bouquet_ids, 'about':first_bouquet.description})
+        await callback.message.answer_photo(photo=types.BufferedInputFile(file=frombuffer(first_bouquet.binary_photo,uint8), filename='image'),
+                                            caption='Вот варианты ваших букетов',
+                                            reply_markup=choose_flower_keyboard(len(bouquet_ids),0,first_bouquet.name,first_bouquet.price,first_bouquet.id)
+                                            )
+   
 
 async def choose_flower_callback(callback: types.CallbackQuery, state: FSMContext):
-    #Переписать полностью логику
-    await callback.message.delete()
     data = callback.data.split("_")[1]
-    await state.update_data({'color':data})
-    current_year = datetime.datetime.now().year
-    current_month = datetime.datetime.now().month
-    await state.update_data({"year": current_year, "month": current_month})
-    await state.set_state(CreateOrder.choose_date)
-    await callback.message.answer('Выберите дату доставки', reply_markup=create_calendar(current_year, current_month))
+    state_data = await state.get_data()
+    number = state_data['number']
+    amount = state_data['amount']
+    about = state_data['about']
+    bouquet_ids = state_data['bouquet_list']
+    if data == 'back':
+        if number - 1 < 0:
+            number = amount - 1
+        else:
+            number -= 1
+        await state.update_data({'number':number})
+        await edit_image_keyboard(callback,state,'Вот варианты ваших букетов')
+    if data == 'forward':
+        if number + 1 > amount - 1:
+            number = 0
+        else:
+            number += 1
+        await state.update_data({'number':number})
+        await edit_image_keyboard(callback,state,'Вот варианты ваших букетов')
+    if data == 'check':
+        await callback.answer(about)
+    if data == 'consultation':
+        await callback.message.answer(text='С вами свяжеться наш консультант')
+        await create_consultation(callback)
+        await callback.message.delete()
+    if data == 'another':
+        another_flowers_ids = await get_another_ids_flowers(bouquet_ids)
+        if not another_flowers_ids:
+            await edit_image_keyboard(callback,state,'В данный момент все, что есть(')
+        else:
+            first_bouquet = await get_byid_flower(another_flowers_ids[0])
+            await state.update_data({'number':0,'amount':len(another_flowers_ids),'bouquet_list':another_flowers_ids, 'about':first_bouquet.description})
+            await callback.message.answer_photo(photo=types.BufferedInputFile(file=frombuffer(first_bouquet.binary_photo,uint8), filename='image'),
+                                    caption='Вот другие букеты',
+                                    reply_markup=choose_flower_keyboard(len(bouquet_ids),0,first_bouquet.name,first_bouquet.price,first_bouquet.id)
+                                    )
+    if data == 'choose':
+        id_bouquet = callback.data.split("_")[2]
+        await state.update_data({'id_flower':id_bouquet})
+        current_year = datetime.datetime.now().year
+        current_month = datetime.datetime.now().month
+        await state.set_state(CreateOrder.choose_date)
+        await callback.message.answer('Выберите дату доставки', reply_markup=create_calendar(current_year, current_month))
+
 
 async def swith_month_callback(callback: types.CallbackQuery, state: FSMContext):
     data = callback.data.split("_")[1]

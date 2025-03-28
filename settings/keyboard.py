@@ -1,7 +1,7 @@
 from aiogram import types
 from datetime import datetime
 import calendar
-
+from .db_helper import get_actions, get_colors, get_money
 
 def create_time_control_keyboard(hours=0, minutes=0):
     def wrap_time(h, m):
@@ -68,30 +68,33 @@ def user_agreement_keyboard():
     return types.InlineKeyboardMarkup(inline_keyboard=keyboard_buttons)
 
 
-def choose_action_keyboard():
-    #Наполнение из бд
-    keyboard_buttons = [
-        [types.InlineKeyboardButton(text='свадьба',callback_data='action_1')],
-        [types.InlineKeyboardButton(text='в школу', callback_data='action_2')],
-        [types.InlineKeyboardButton(text='Отмена', callback_data='exit')]
-    ]
+async def choose_action_keyboard():
+    keyboard_buttons = []
+    actions = await get_actions()
+    for action in actions:
+        keyboard_buttons.append([types.InlineKeyboardButton(text=action.name, callback_data=f'action_{action.id}')])
+    else:
+        keyboard_buttons.append([types.InlineKeyboardButton(text='Отмена', callback_data='exit')])
     return types.InlineKeyboardMarkup(inline_keyboard=keyboard_buttons)
 
 
-def choose_money_keyboard():
-    keyboard_buttons = [
-        [types.InlineKeyboardButton(text='500',callback_data='money_1')],
-        [types.InlineKeyboardButton(text='1000', callback_data='money_2')],
-        [types.InlineKeyboardButton(text='Отмена', callback_data='exit')]
-    ]
+async def choose_money_keyboard():
+    keyboard_buttons = []
+    moneys = await get_money()
+    for money in moneys:
+        keyboard_buttons.append([types.InlineKeyboardButton(text=f'{money}р', callback_data=f'money_{money}')])
+    else:
+        keyboard_buttons.append([types.InlineKeyboardButton(text='Отмена', callback_data='exit')])
     return types.InlineKeyboardMarkup(inline_keyboard=keyboard_buttons)
 
-def choose_color_keyboard():
-    keyboard_buttons = [
-        [types.InlineKeyboardButton(text='синий',callback_data='color_1')],
-        [types.InlineKeyboardButton(text='зеленый', callback_data='color_2')],
-        [types.InlineKeyboardButton(text='Отмена', callback_data='exit')]
-    ]
+
+async def choose_color_keyboard():
+    keyboard_buttons = []
+    colors = await get_colors()
+    for color in colors:
+        keyboard_buttons.append([types.InlineKeyboardButton(text=color.name, callback_data=f'color_{color.id}')])
+    else:
+        keyboard_buttons.append([types.InlineKeyboardButton(text='Отмена', callback_data='exit')])
     return types.InlineKeyboardMarkup(inline_keyboard=keyboard_buttons)    
 
 def exit_keyboard():
@@ -99,12 +102,20 @@ def exit_keyboard():
         text='Отмена', callback_data='exit')]]
     return types.InlineKeyboardMarkup(inline_keyboard=keyboard_button)
 
-def choose_flower_keyboard():
-    keyboard_button = [[types.InlineKeyboardButton(text='<=',callback_data='flower_back'),
-                        types.InlineKeyboardButton(text='<=',callback_data='flower_choose'),
-                        types.InlineKeyboardButton(text='<=',callback_data='flower_forward')],
-                        [types.InlineKeyboardButton(text='Закзать консультацию',callback_data='flower_forward')],
-                        [types.InlineKeyboardButton(text='Предложить другие варианты',callback_data='flower_forward')],
-                        [types.InlineKeyboardButton(text='Отмена', callback_data='exit')]
-                       ]
+def choose_flower_keyboard(amount, number, name, price, id):
+    if amount > 1:
+        keyboard_button = [[types.InlineKeyboardButton(text='<=',callback_data='flower_back'),
+                            types.InlineKeyboardButton(text=f'{number + 1}/{amount}',callback_data=f'flower_check'),
+                            types.InlineKeyboardButton(text='=>',callback_data='flower_forward')],
+                            [types.InlineKeyboardButton(text=f'Выбрать {name} за {price}р.',callback_data=f'flower_choose_{id}')],
+                            [types.InlineKeyboardButton(text='Закзать консультацию',callback_data='flower_consultation')],
+                            [types.InlineKeyboardButton(text='Предложить другие варианты',callback_data='flower_another')],
+                            [types.InlineKeyboardButton(text='Отмена', callback_data='exit')]
+                        ]
+    else:
+        keyboard_button = [[types.InlineKeyboardButton(text=f'{number + 1}/{amount}',callback_data=f'flower_check'),],
+                            [types.InlineKeyboardButton(text=f'Выбрать {name} за {price}р.',callback_data=f'flower_choose_{id}')],
+                            [types.InlineKeyboardButton(text='Закзать консультацию',callback_data='flower_consultation')],
+                            [types.InlineKeyboardButton(text='Отмена', callback_data='exit')]
+                        ]
     return types.InlineKeyboardMarkup(inline_keyboard=keyboard_button)

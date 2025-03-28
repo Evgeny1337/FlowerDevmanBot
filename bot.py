@@ -8,7 +8,6 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram import F
 from aiogram.filters import CommandStart
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from settings.handler import start_handler
 from settings.callback import (user_agreement_callback, choose_action_callback, exit_callback,
                                choose_money_callback, choose_color_callback, choose_flower_callback, 
