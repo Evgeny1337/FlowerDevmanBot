@@ -47,14 +47,17 @@ class BouquetOfFlowers(models.Model):
         return f'{self.name} - {self.price}'
 
     def save(self, *args, **kwargs):
-        image = Image.open(self.binary_photo)
+        try:
+            image = Image.open(self.binary_photo)
 
-        img_io = io.BytesIO()
-        image.save(img_io, format=image.format)
-        img_io.seek(0)
+            img_io = io.BytesIO()
+            image.save(img_io, format=image.format)
+            img_io.seek(0)
 
-        self.binary_photo = img_io.read()
-        super(BouquetOfFlowers, self).save(*args, **kwargs)
+            self.binary_photo = img_io.read()
+            super(BouquetOfFlowers, self).save(*args, **kwargs)
+        except UnicodeDecodeError:
+            super(BouquetOfFlowers, self).save(*args, **kwargs)
 
 
 class Consultation(models.Model):

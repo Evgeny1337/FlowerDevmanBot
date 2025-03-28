@@ -1,6 +1,11 @@
+import base64
+from io import BytesIO
+
+from PIL import Image
 from django.contrib import admin
 from django.forms import ModelForm
 from django import forms
+from django.utils.safestring import mark_safe
 
 from .models import Flower, Event, Order, CustomUser, BouquetOfFlowers, Consultation, ColorPalette
 
@@ -37,7 +42,7 @@ class BouquetOfFlowersForm(ModelForm):
         model = BouquetOfFlowers
         fields = '__all__'
 
-    binary_photo = forms.ImageField()
+    binary_photo = forms.ImageField(required=False)
 
 
 @admin.register(CustomUser)
@@ -67,10 +72,21 @@ class ColorPaletteAdmin(admin.ModelAdmin):
 @admin.register(BouquetOfFlowers)
 class BouquetOfFlowersAdmin(admin.ModelAdmin):
     form = BouquetOfFlowersForm
-    list_display = ['id', 'name', 'price']
+    list_display = ['id', 'name', 'price', 'current_image']
+    readonly_fields = ['current_image']
+    exclude = ['flowers', 'events', 'color_palette']
     search_fields = ['name']
     list_filter = ['price', 'name']
     inlines = [EventAdminInline, FlowerAdminInline, ColorPaletteAdminInline]
+
+    def current_image(self, obj):
+        if obj.binary_photo:
+            image = Image.open(BytesIO(obj.binary_photo))
+            buffer = BytesIO()
+            image.save(buffer, format="PNG")
+            img_str = base64.b64encode(buffer.getvalue()).decode('utf-8')
+            return mark_safe(f'<img src="data:image/png;base64,{img_str}" width="100" height="100" />')
+        return None
 
 
 @admin.register(Consultation)
