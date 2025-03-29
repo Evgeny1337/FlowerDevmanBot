@@ -23,3 +23,4 @@ tzdata==2025.1
 tzlocal==5.3.1
 urllib3==2.2.3
 yarl==1.18.3
+Django==5.1.7

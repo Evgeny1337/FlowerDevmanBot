@@ -7,7 +7,7 @@ from django.forms import ModelForm
 from django import forms
 from django.utils.safestring import mark_safe
 
-from .models import Flower, Event, Order, CustomUser, BouquetOfFlowers, Consultation, ColorPalette
+from .models import Flower, Event, Order, CustomUser, BouquetOfFlowers, Consultation, ColorPalette, Staff
 
 
 class EventAdminInline(admin.TabularInline):
@@ -47,6 +47,12 @@ class BouquetOfFlowersForm(ModelForm):
 
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
+    list_display = ['telegram_id', 'telegram_username']
+    search_fields = ['telegram_id', 'telegram_username']
+
+
+@admin.register(Staff)
+class StaffAdmin(admin.ModelAdmin):
     list_display = ['username', 'telegram_username']
     search_fields = ['username', 'telegram_username']
 

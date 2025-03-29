@@ -5,12 +5,20 @@ from django.db import models
 from PIL import Image
 
 
-class CustomUser(AbstractUser):
+class Staff(AbstractUser):
     telegram_id = models.BigIntegerField(unique=True, blank=True, null=True)
     telegram_username = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         return f"{self.username} - {self.telegram_username}"
+
+
+class CustomUser(models.Model):
+    telegram_id = models.BigIntegerField(unique=True, blank=True, null=True)
+    telegram_username = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.telegram_id} - {self.telegram_username}"
 
 
 class Flower(models.Model):
@@ -61,7 +69,8 @@ class BouquetOfFlowers(models.Model):
 
 
 class Consultation(models.Model):
-    customer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='consultations',null=True, blank=True)
+    customer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='consultations', null=True,
+                                 blank=True)
     created = models.DateTimeField(auto_now_add=True)
     question = models.TextField(null=True, blank=True)
     phone_number = models.BigIntegerField()
@@ -76,7 +85,7 @@ class Order(models.Model):
     address = models.CharField(max_length=50)
     status = models.BooleanField(default=False)
     bouquet_of_flowers = models.ForeignKey(BouquetOfFlowers, on_delete=models.CASCADE, related_name='orders')
-    exclude_flowers = models.ManyToManyField(Flower, blank=True, related_name='orders',null=True)
+    exclude_flowers = models.ManyToManyField(Flower, blank=True, related_name='orders', null=True)
     delivery = models.DateTimeField()
     phone_number = models.BigIntegerField()
     created = models.DateTimeField(auto_now_add=True)
