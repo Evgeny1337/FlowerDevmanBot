@@ -108,7 +108,7 @@ def choose_flower_keyboard(amount, number, name, price, id):
                             types.InlineKeyboardButton(text=f'{number + 1}/{amount}',callback_data=f'flower_check'),
                             types.InlineKeyboardButton(text='=>',callback_data='flower_forward')],
                             [types.InlineKeyboardButton(text=f'Выбрать {name} за {price}р.',callback_data=f'flower_choose_{id}')],
-                            [types.InlineKeyboardButton(text='Закзать консультацию',callback_data='flower_consultation')],
+                            [types.InlineKeyboardButton(text='Заказать консультацию',callback_data='flower_consultation')],
                             [types.InlineKeyboardButton(text='Предложить другие варианты',callback_data='flower_another')],
                             [types.InlineKeyboardButton(text='Отмена', callback_data='exit')]
                         ]
@@ -116,6 +116,9 @@ def choose_flower_keyboard(amount, number, name, price, id):
         keyboard_button = [[types.InlineKeyboardButton(text=f'{number + 1}/{amount}',callback_data=f'flower_check'),],
                             [types.InlineKeyboardButton(text=f'Выбрать {name} за {price}р.',callback_data=f'flower_choose_{id}')],
                             [types.InlineKeyboardButton(text='Закзать консультацию',callback_data='flower_consultation')],
+                            [types.InlineKeyboardButton(text='Предложить другие варианты',callback_data='flower_another')],
                             [types.InlineKeyboardButton(text='Отмена', callback_data='exit')]
                         ]
     return types.InlineKeyboardMarkup(inline_keyboard=keyboard_button)
+
+

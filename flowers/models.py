@@ -61,22 +61,22 @@ class BouquetOfFlowers(models.Model):
 
 
 class Consultation(models.Model):
-    customer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='consultations')
+    customer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='consultations',null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     question = models.TextField(null=True, blank=True)
     phone_number = models.BigIntegerField()
     status = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.customer.telegram_username
+        return f'{self.phone_number}'
 
 
 class Order(models.Model):
-    customer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='orders')
+    customer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='orders', blank=True, null=True)
     address = models.CharField(max_length=50)
     status = models.BooleanField(default=False)
     bouquet_of_flowers = models.ForeignKey(BouquetOfFlowers, on_delete=models.CASCADE, related_name='orders')
-    exclude_flowers = models.ManyToManyField(Flower, blank=True, related_name='orders')
+    exclude_flowers = models.ManyToManyField(Flower, blank=True, related_name='orders',null=True)
     delivery = models.DateTimeField()
     phone_number = models.BigIntegerField()
     created = models.DateTimeField(auto_now_add=True)
@@ -84,4 +84,4 @@ class Order(models.Model):
     total_price = models.DecimalField(decimal_places=2, max_digits=10)
 
     def __str__(self):
-        return self.customer.telegram_username
+        return f'{self.phone_number}'

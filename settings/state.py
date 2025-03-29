@@ -9,3 +9,7 @@ class CreateOrder(StatesGroup):
     choose_flower = State()
     choose_date = State()
     choose_time = State()
+    choose_name = State()
+    choose_address = State()
+    choose_phonenumber = State()
+    choose_consultation = State()

@@ -82,8 +82,8 @@ async def choose_flower_callback(callback: types.CallbackQuery, state: FSMContex
     if data == 'check':
         await callback.answer(about)
     if data == 'consultation':
-        await callback.message.answer(text='С вами свяжеться наш консультант')
-        await create_consultation(callback)
+        await callback.message.answer(text='Введите контактный номер телефона для связи')
+        await state.set_state(CreateOrder.choose_consultation)
         await callback.message.delete()
     if data == 'another':
         another_flowers_ids = await get_another_ids_flowers(bouquet_ids)
@@ -94,14 +94,16 @@ async def choose_flower_callback(callback: types.CallbackQuery, state: FSMContex
             await state.update_data({'number':0,'amount':len(another_flowers_ids),'bouquet_list':another_flowers_ids, 'about':first_bouquet.description})
             await callback.message.answer_photo(photo=types.BufferedInputFile(file=frombuffer(first_bouquet.binary_photo,uint8), filename='image'),
                                     caption='Вот другие букеты',
-                                    reply_markup=choose_flower_keyboard(len(bouquet_ids),0,first_bouquet.name,first_bouquet.price,first_bouquet.id)
+                                    reply_markup=choose_flower_keyboard(len(another_flowers_ids),0,first_bouquet.name,first_bouquet.price,first_bouquet.id)
                                     )
     if data == 'choose':
+        await callback.message.delete()
         id_bouquet = callback.data.split("_")[2]
-        await state.update_data({'id_flower':id_bouquet})
+        await state.update_data({'id_bouquet':id_bouquet})
         current_year = datetime.datetime.now().year
         current_month = datetime.datetime.now().month
         await state.set_state(CreateOrder.choose_date)
+        await state.update_data({'year': current_year, 'month': current_month})
         await callback.message.answer('Выберите дату доставки', reply_markup=create_calendar(current_year, current_month))
 
 
@@ -173,4 +175,5 @@ async def switch_time_callback(callback: types.CallbackQuery, state: FSMContext)
         await callback.message.edit_text(text='Выберите время когда хотите забрать ваш букет', reply_markup=create_time_control_keyboard(current_hours, current_minutes))
     else:
         await callback.message.delete()
-        await callback.message.answer('Дальше больше')
+        await state.set_state(CreateOrder.choose_name)
+        await callback.message.answer('Введите имя')
