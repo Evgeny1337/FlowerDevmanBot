@@ -8,9 +8,9 @@ async def start_handler(message: types.Message, state: FSMContext):
     await state.clear()
     await message.delete()
 
-    #Вывод pdf или текстом пользоватальеское соглашение
-    consent_text = "Пользовательское соглашение"
-    await message.answer(consent_text,reply_markup=user_agreement_keyboard())
+
+    user_agreement = types.FSInputFile("user_agreement.pdf")
+    await message.answer_document(user_agreement, caption="Пользовательское соглашение", reply_markup=user_agreement_keyboard())
 
 
 async def name_handler(message: types.Message, state: FSMContext):
