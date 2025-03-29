@@ -12,7 +12,8 @@ from .message_helper import edit_image_keyboard, create_consultation
 async def exit_callback(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.delete()
     await state.clear()
-    await callback.message.answer('Вы отменили свои действия')
+    await state.set_state(CreateOrder.choose_action) 
+    await callback.message.answer('Вы отменили свои действия. Начнем сначала. К какому событию готовимся?', reply_markup= await choose_action_keyboard())
 
 async def user_agreement_callback(callback: types.CallbackQuery, state: FSMContext):
     await callback.message.delete()
