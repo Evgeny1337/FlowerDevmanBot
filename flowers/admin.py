@@ -47,14 +47,14 @@ class BouquetOfFlowersForm(ModelForm):
 
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ['telegram_id', 'telegram_username']
-    search_fields = ['telegram_id', 'telegram_username']
+    list_display = ['telegram_id', 'telegram_username', ]
+    search_fields = ['telegram_id', 'telegram_username', ]
 
 
 @admin.register(Staff)
 class StaffAdmin(admin.ModelAdmin):
-    list_display = ['username', 'telegram_username']
-    search_fields = ['username', 'telegram_username']
+    list_display = ['username', 'telegram_username', ]
+    search_fields = ['username', 'telegram_username', ]
 
 
 @admin.register(Flower)
@@ -78,11 +78,11 @@ class ColorPaletteAdmin(admin.ModelAdmin):
 @admin.register(BouquetOfFlowers)
 class BouquetOfFlowersAdmin(admin.ModelAdmin):
     form = BouquetOfFlowersForm
-    list_display = ['id', 'name', 'price', 'current_image']
-    readonly_fields = ['current_image']
-    exclude = ['flowers', 'events', 'color_palette']
-    search_fields = ['name']
-    list_filter = ['price', 'name']
+    list_display = ['id', 'name', 'price', 'current_image', ]
+    readonly_fields = ['current_image', ]
+    exclude = ['flowers', 'events', 'color_palette', ]
+    search_fields = ['name', ]
+    list_filter = ['price', 'name', ]
     inlines = [EventAdminInline, FlowerAdminInline, ColorPaletteAdminInline]
 
     def current_image(self, obj):
@@ -97,19 +97,19 @@ class BouquetOfFlowersAdmin(admin.ModelAdmin):
 
 @admin.register(Consultation)
 class ConsultationAdmin(admin.ModelAdmin):
-    list_display = ['id', 'customer', 'created', 'status']
+    list_display = ['id', 'customer', 'created', 'status', ]
     list_editable = ['status', ]
-    search_fields = ['customer__username']
+    search_fields = ['customer__telegram_username', 'customer__telegram_id', ]
 
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     form = OrderForm
     list_display = ['id', 'customer', 'address', 'bouquet_of_flowers', 'delivery', 'status',
-                    'total_price_with_currency']
-    list_filter = ['delivery', 'status', 'bouquet_of_flowers']
+                    'total_price_with_currency', ]
+    list_filter = ['delivery', 'status', 'bouquet_of_flowers', ]
     list_editable = ['status', ]
-    search_fields = ['customer__username', 'address', 'bouquet_of_flowers__name']
+    search_fields = ['customer__telegram_username', 'address', 'bouquet_of_flowers__name', 'customer__telegram_id', ]
 
     def total_price_with_currency(self, obj):
         return f"{obj.total_price} руб."
