@@ -34,29 +34,26 @@ async def address_handler(message: types.Message, state: FSMContext):
 
 
 async def phone_handler(message: types.Message, state: FSMContext):
-    # await message.delete()
     state_name = await state.get_state()
     await state.update_data({'phone':message.text})
     if state_name == 'CreateOrder:choose_phonenumber':
-        await create_order_message(message,state)
+        await state.set_state(CreateOrder.choose_pay)
+        state_data = await state.get_data()
+        prices = [types.LabeledPrice(label='Оплата', amount=state_data['money'])]
+        pay_token = environ['PAYMENT_PROVIDER_TOKEN']
+        await message.bot.send_invoice(
+            message.chat.id,
+            title="Заказ букета",
+            description="Выберите способ оплаты.",
+            payload="invoice_payload",
+            provider_token=pay_token,  
+            currency="USD",
+            prices=prices,
+            start_parameter='test-invoice',
+            is_flexible=False
+        )
     else:
         await create_consultation(message,state)
-
-
-async def pay_handler(message: types.Message, state: FSMContext):
-    prices = [types.LabeledPrice(label='Оплата', amount=1000)]
-    pay_token = environ['PAYMENT_PROVIDER_TOKEN']
-    await message.bot.send_invoice(
-        message.chat.id,
-        title="Заказ букета",
-        description="Выберите способ оплаты.",
-        payload="order_id",
-        provider_token=pay_token,  
-        currency="USD",
-        prices=prices,
-        start_parameter="time-to-pay",
-        is_flexible=False
-    )
 
 async def pre_checkout_handler(pre_checkout_query: types.PreCheckoutQuery):
     await pre_checkout_query.bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True)
@@ -70,6 +67,7 @@ async def successful_payment_handler(message: types.Message, state:FSMContext):
     print(f"Payment payload: {payment_info.invoice_payload}")
     print(f"Telegram payment charge ID: {payment_info.telegram_payment_charge_id}")
     print(f"Provider payment charge ID: {payment_info.provider_payment_charge_id}")
+    await create_order_message(message,state)
 
 
 async def create_order_handler(message: types.Message, state: FSMContext):

@@ -9,7 +9,7 @@ from aiogram.enums import ParseMode
 from aiogram import F
 from aiogram.filters import CommandStart
 from settings.handler import (start_handler,name_handler,address_handler,phone_handler,
-                              create_order_handler,create_consultation_handler)
+                              create_order_handler,create_consultation_handler,pre_checkout_handler,successful_payment_handler)
 from settings.callback import (user_agreement_callback, choose_action_callback, exit_callback,
                                choose_money_callback, choose_color_callback, choose_flower_callback, 
                                swith_month_callback, switch_time_callback, choose_date_callback)
@@ -28,7 +28,9 @@ async def main():
     dp.message.register(phone_handler, F.text.regexp(r'^\+?\d{1,3}?[-.\s]?\(?\d{1,4}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}$'),CreateOrder.choose_consultation)
     dp.message.register(create_order_handler, F.text == 'Создать заказ')
     dp.message.register(create_consultation_handler, F.text == 'Запросить консультацию')
-    
+
+    dp.pre_checkout_query.register(pre_checkout_handler)
+    dp.message.register(successful_payment_handler,F.successful_payment,CreateOrder.choose_pay)
 
     dp.callback_query.register(exit_callback, F.data == 'exit')
     dp.callback_query.register(user_agreement_callback,F.data.startswith('agreement'))

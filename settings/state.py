@@ -13,3 +13,4 @@ class CreateOrder(StatesGroup):
     choose_address = State()
     choose_phonenumber = State()
     choose_consultation = State()
+    choose_pay = State()
