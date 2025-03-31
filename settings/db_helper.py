@@ -14,7 +14,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'flowers_shop.settings')
 django.setup()
 
 
-from flowers.models import Event, ColorPalette, BouquetOfFlowers, CustomUser, Consultation, Order
+from flowers.models import Event, ColorPalette, BouquetOfFlowers, CustomUser, Consultation, Order, Staff
 
 
 @sync_to_async
@@ -45,7 +45,7 @@ def get_byid_flower(id):
 
 @sync_to_async
 def get_ids_admins():
-    return [user.telegram_id for user in CustomUser.objects.exclude(telegram_id=None)]
+    return [user.telegram_id for user in Staff.objects.exclude(telegram_id=None)]
 
 @sync_to_async
 def save_consultations(phone_number):
@@ -64,3 +64,15 @@ def save_order(bouquet_id,address,datetime,phone_number):
     print(order)
     order.save()
     return order
+
+@sync_to_async
+def check_user(tg_id):
+    exist_user = Staff.objects.filter(telegram_id=tg_id).first()
+    if exist_user:
+        return True
+    return False
+
+@sync_to_async
+def create_user(tg_id,name):
+    user = Staff.objects.create(telegram_id=tg_id, telegram_username=name)
+    return user

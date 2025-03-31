@@ -3,10 +3,11 @@ from aiogram.fsm.context import FSMContext
 import datetime
 from .state import CreateOrder
 from .keyboard import (choose_action_keyboard, choose_money_keyboard, choose_color_keyboard,
-                       choose_flower_keyboard, create_calendar, create_time_control_keyboard, user_agreement_keyboard)
-from .db_helper import get_flowers_id, get_byid_flower, get_another_ids_flowers
+                       choose_flower_keyboard, create_calendar, create_time_control_keyboard,
+                       user_agreement_keyboard, choose_start_keyboard)
+from .db_helper import get_flowers_id, get_byid_flower, get_another_ids_flowers, create_user
 from numpy import frombuffer, uint8
-from .message_helper import edit_image_keyboard, create_consultation
+from .message_helper import edit_image_keyboard
 
 
 async def exit_callback(callback: types.CallbackQuery, state: FSMContext):
@@ -19,8 +20,11 @@ async def user_agreement_callback(callback: types.CallbackQuery, state: FSMConte
     await callback.message.delete()
     data = callback.data.split("_")[1]
     if data == 'yes':
-        await state.set_state(CreateOrder.choose_action)
-        await callback.message.answer('К какому событию готовимся?', reply_markup= await choose_action_keyboard())
+        state_data = await state.get_data()
+        await create_user(state_data['tg_id'], state_data['name'])
+        # await state.set_state(CreateOrder.choose_action)
+        # await callback.message.answer('К какому событию готовимся?', reply_markup= await choose_action_keyboard())
+        await callback.message.answer('Написать нормальное приветсвие', reply_markup=choose_start_keyboard())
     if data == 'no':
         user_agreement = types.FSInputFile("user_agreement.pdf")
         await callback.message.answer_document(user_agreement, caption="Для работы с Телеграм-ботом необходимо ваше согласие", reply_markup=user_agreement_keyboard())
