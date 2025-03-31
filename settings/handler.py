@@ -14,7 +14,7 @@ async def start_handler(message: types.Message, state: FSMContext):
     await state.update_data({'name':user_name,'tg_id':tg_id})
     exist_user = await check_user(tg_id)
     if not exist_user:
-        user_agreement = types.FSInputFile("user_agreement.pdf")
+        user_agreement = types.FSInputFile("static/user_agreement.pdf")
         await message.answer_document(user_agreement, caption="Пользовательское соглашение", reply_markup=user_agreement_keyboard())
     else:
         await message.answer('Написать нормальное приветсвие', reply_markup=choose_start_keyboard())
