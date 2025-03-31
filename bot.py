@@ -23,11 +23,12 @@ async def main():
     dp = Dispatcher()
     dp.message.register(start_handler, CommandStart())
     dp.message.register(name_handler, F.text, CreateOrder.choose_name)
-    dp.message.register(address_handler, F.text,CreateOrder.choose_address)
+    dp.message.register(address_handler, F.text, CreateOrder.choose_address)
     dp.message.register(phone_handler, F.text.regexp(r'^\+?\d{1,3}?[-.\s]?\(?\d{1,4}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}$'),CreateOrder.choose_phonenumber)
     dp.message.register(phone_handler, F.text.regexp(r'^\+?\d{1,3}?[-.\s]?\(?\d{1,4}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9}$'),CreateOrder.choose_consultation)
     dp.message.register(create_order_handler, F.text == 'Создать заказ')
     dp.message.register(create_consultation_handler, F.text == 'Запросить консультацию')
+    
 
     dp.callback_query.register(exit_callback, F.data == 'exit')
     dp.callback_query.register(user_agreement_callback,F.data.startswith('agreement'))
