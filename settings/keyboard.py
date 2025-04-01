@@ -122,7 +122,9 @@ def choose_flower_keyboard(amount, number, name, price, id):
     return types.InlineKeyboardMarkup(inline_keyboard=keyboard_button)
 
 def choose_start_keyboard():
-    keyboard_buttons = [[types.KeyboardButton(text='Создать заказ'),types.KeyboardButton(text='Запросить консультацию')]]
-    return types.ReplyKeyboardMarkup(keyboard=keyboard_buttons)
-
+    keyboard_buttons = [
+        [types.KeyboardButton(text='Создать заказ')],
+        [types.KeyboardButton(text='Запросить консультацию')]
+    ]
+    return types.ReplyKeyboardMarkup(keyboard=keyboard_buttons, resize_keyboard=True, one_time_keyboard=True)
 

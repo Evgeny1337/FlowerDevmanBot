@@ -22,7 +22,7 @@ async def user_agreement_callback(callback: types.CallbackQuery, state: FSMConte
     if data == 'yes':
         state_data = await state.get_data()
         await create_user(state_data['tg_id'], state_data['name'])
-        # await state.set_state(CreateOrder.choose_action)
+        await state.set_state(CreateOrder.choose_action)
         # await callback.message.answer('К какому событию готовимся?', reply_markup= await choose_action_keyboard())
         await callback.message.answer('Написать нормальное приветсвие', reply_markup=choose_start_keyboard())
     if data == 'no':

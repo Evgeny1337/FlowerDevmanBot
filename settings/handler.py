@@ -17,7 +17,7 @@ async def start_handler(message: types.Message, state: FSMContext):
         user_agreement = types.FSInputFile("static/user_agreement.pdf")
         await message.answer_document(user_agreement, caption="Пользовательское соглашение", reply_markup=user_agreement_keyboard())
     else:
-        await message.answer('Написать нормальное приветсвие', reply_markup=choose_start_keyboard())
+        await message.answer('Добро пожаловать! Давайте начнем процесс создания вашего букета', reply_markup=choose_start_keyboard())
 
 
 async def name_handler(message: types.Message, state: FSMContext):
@@ -61,8 +61,8 @@ async def pre_checkout_handler(pre_checkout_query: types.PreCheckoutQuery):
 async def successful_payment_handler(message: types.Message, state:FSMContext):
     payment_info = message.successful_payment
     await message.answer(
-        f"Спасибо бро что отдал свои {payment_info.total_amount / 100} {payment_info.currency}!\n"
-        "Ждем еще"
+        f"Спасибо за вашу оплату! Мы получили {payment_info.total_amount / 100} {payment_info.currency}!\n"
+        "Ваш заказ скоро будет обработан. Ждем вашего следующего визита!"
     )
     print(f"Payment payload: {payment_info.invoice_payload}")
     print(f"Telegram payment charge ID: {payment_info.telegram_payment_charge_id}")
