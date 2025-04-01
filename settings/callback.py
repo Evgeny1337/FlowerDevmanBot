@@ -21,10 +21,8 @@ async def user_agreement_callback(callback: types.CallbackQuery, state: FSMConte
     data = callback.data.split("_")[1]
     if data == 'yes':
         state_data = await state.get_data()
-        await create_user(state_data['tg_id'], state_data['name'])
-        await state.set_state(CreateOrder.choose_action)
-        # await callback.message.answer('К какому событию готовимся?', reply_markup= await choose_action_keyboard())
-        await callback.message.answer('Написать нормальное приветсвие', reply_markup=choose_start_keyboard())
+        await create_user(state_data['tg_id'], state_data['name'])     
+        await callback.message.answer('Добро пожаловать! Давайте начнем процесс создания вашего букета', reply_markup=choose_start_keyboard())
     if data == 'no':
         user_agreement = types.FSInputFile("user_agreement.pdf")
         await callback.message.answer_document(user_agreement, caption="Для работы с Телеграм-ботом необходимо ваше согласие", reply_markup=user_agreement_keyboard())

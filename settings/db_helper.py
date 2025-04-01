@@ -74,5 +74,5 @@ def check_user(tg_id):
 
 @sync_to_async
 def create_user(tg_id,name):
-    user = Staff.objects.create(telegram_id=tg_id, telegram_username=name)
+    user = Staff.objects.create(telegram_id=tg_id, telegram_username=name, username=f"user_{tg_id}")
     return user
